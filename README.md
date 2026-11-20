@@ -1,2 +1,1 @@
-# mx-web
-mailbox existence check (RCPT only, nothing is sent)
+Mailbox existence check (RCPT only, QUIT before DATA: nothing is ever sent).
