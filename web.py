@@ -6,7 +6,7 @@ from emailaudit.probe import smtp_probe, port25_shut, seal, unseal
 KEY = os.environ.get("MXKEY", "").strip()
 NONCE = os.environ.get("NONCE", "")
 CB = os.environ.get("CB", "")
-OK_CB = ("https://check.citant.ai/", "https://ai-crawler-check-")
+OK_CB = re.compile(r"^https://(check\.citant\.ai|ai-crawler-check-[a-z0-9-]+\.vercel\.app)/api/mailcheck$")
 out = {"nonce": NONCE, "port25_shut": False, "results": {}, "at": int(time.time() * 1000)}
 def save():
     json.dump({"sealed": seal(KEY, json.dumps(out))}, open("results.json", "w"))
@@ -22,7 +22,7 @@ def run(lst):
     with ThreadPoolExecutor(6) as ex:
         list(ex.map(one, sorted(by_dom)))
 def post():
-    if not CB.startswith(OK_CB):
+    if not OK_CB.match(CB):
         print("no callback")
         return
     body = json.dumps({"sealed": seal(KEY, json.dumps(out))}).encode()
