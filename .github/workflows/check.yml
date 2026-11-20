@@ -1,0 +1,36 @@
+name: check
+run-name: ${{ inputs.nonce }}
+on:
+  workflow_dispatch:
+    inputs:
+      nonce:
+        required: true
+      addrs:
+        required: true
+      cb:
+        required: false
+        default: ""
+permissions:
+  contents: read
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -q dnspython
+      - run: python3 web.py
+        timeout-minutes: 10
+        env:
+          ADDRS: ${{ inputs.addrs }}
+          NONCE: ${{ inputs.nonce }}
+          CB: ${{ inputs.cb }}
+          MXKEY: ${{ secrets.MXKEY }}
+          GREY_WAIT: "120"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: results.json
+          retention-days: 1
+          if-no-files-found: ignore
